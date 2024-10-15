@@ -82,6 +82,7 @@ def printCsv(list,toNameFile,existing):
             for i in range(len(list)): #for each object in the list write the object with all its sub properties
                 writer.writerow([list[i].areas,list[i].periods, list[i].climate, list[i].specialConditions])
 
+
 #checks to see if there is data for fauna, flora, or if both have valid data
 def checkLength(faunaData,floraData):
     if len(faunaData) >=1 and len(floraData) >=1:
@@ -117,6 +118,7 @@ def main():
     else: 
         print("No existing files") 
  
+
     #user input for initial setup
     faunaSize = input("How many fauna live in your zoo?: ")
     floraSize = input("How many flora live in your zoo?: ")
