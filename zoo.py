@@ -1,8 +1,22 @@
-#Imports Fauna and Flora to hold the data
+#Imports 
 from fauna import Fauna
 from flora import Flora
-#imports csv to save data to csv
 import csv
+import numpy as np
+import os
+
+#Check for existing files
+def checkForExistingFiles():
+    existingFiles = []
+    if os.path.exists("fauna.txt"):
+        existingFiles.append("fauna.txt")
+    if os.path.exists("fauna.csv"):
+        existingFiles.append("fauna.csv")
+    if os.path.exists("flora.txt"):
+        existingFiles.append("flora.txt")
+    if os.path.exists("flora.csv"):
+        existingFiles.append("flora.csv")
+    return existingFiles
 
 #gathers the fauna data based on the number of fauna entered
 def getFaunaInput(faunaNum):
@@ -38,53 +52,35 @@ def getFloraInput(floraNum):
     return floraList
 
 #prints list to a text file
-def printText(list,toNameFile):
+def printText(list,toNameFile,existing):
     #checks to see if the named file is flora fauna
     if toNameFile == "flora": #if its flora write the appropriate data to the file
-        with open(toNameFile+".txt", "w") as myFile:
-            myFile.write(f"Areas Periods Climate SpecialConditions\n")
+        with open(toNameFile+".txt", "a") as myFile:
+            if existing == False:
+                myFile.write("Areas Periods Climate SpecialConditions\n")
             for i in list:
-                myFile.write(f"{i.areas}\t{i.periods}\t{i.climate}\t{i.specialConditions}")
+                myFile.write(f"{i.areas}\t{i.periods}\t{i.climate}\t{i.specialConditions}\n")
     elif toNameFile == "fauna": #if its fauna write the appropriate data to the file
-        with open(toNameFile+".txt", "w") as myFile:
-            myFile.write(f"Name Kingdom Phylum Order Family Genus Species\n")
+        with open(toNameFile+".txt", "a") as myFile:
+            if existing == False:
+                myFile.write("Name Kingdom Phylum Order Family Genus Species\n")
             for i in list: #for each object in the list write the object with all its sub properties
-                myFile.write(f"{i.name}\t{i.kingdom}\t{i.phylum}\t{i.order}\t{i.family}\t{i.genus}\t{i.species}")
+                myFile.write(f"{i.name}\t{i.kingdom}\t{i.phylum}\t{i.order}\t{i.family}\t{i.genus}\t{i.species}\n")
 
-def printCsv(list,toNameFile):
+def printCsv(list,toNameFile,existing):
     csvFile = toNameFile + ".csv"
-    with open(csvFile, 'w', newline='') as myFile:
+    with open(csvFile, 'a', newline='') as myFile:
         writer = csv.writer(myFile)
         if toNameFile == "fauna":
-            writer.writerow(["Name","Kingdom","Phylum","Order","Family","Genus","Species"]) #print headers
+            if existing == False:
+                writer.writerow(["Name","Kingdom","Phylum","Order","Family","Genus","Species"]) #print headers
             for i in range(len(list)): #for each object in the list write the object with all its sub properties
                 writer.writerow([list[i].name,list[i].kingdom,list[i].phylum,list[i].order,list[i].family,list[i].genus,list[i].species])
         elif toNameFile == "flora":
-            writer.writerow(["Area","Period","Climate","Special Conditions"]) #print headers
+            if existing == False:
+                writer.writerow(["Area","Period","Climate","Special Conditions"]) #print headers
             for i in range(len(list)): #for each object in the list write the object with all its sub properties
                 writer.writerow([list[i].areas,list[i].periods, list[i].climate, list[i].specialConditions])
-#returns the entire list of flora in a nice print statement        
-def getFloraList(floraList):
-    print("Here are all the Flora in your zoo: \n")
-    for i in floraList: #for each object in the flora list print the table
-        print(f"Areas this plant grows: {i.areas}", end="\t")
-        print(f"The periods the plant grows: {i.periods}", end="\t")
-        print(f"The climate the plant grows in: {i.climate}", end="\t")
-        print(f"Special conditions concerning the plant: {i.specialConditions}", end="\t")
-        print("\n")
-
-#returns the entire list of flora in a nice print statement        
-def getFaunaList(faunaList):
-        print("Here are all the fauna in your zoo: \n")
-        for i in faunaList: #for each object in the fauna list, print the table
-            print(f"Name: {i.name}", end="\t")
-            print(f"Kingdom: {i.kingdom}", end="\t")
-            print(f"Phylum: {i.phylum}", end="\t")
-            print(f"Order: {i.order}", end="\t")
-            print(f"Family: {i.family}", end="\t")
-            print(f"Genus: {i.genus}", end="\t")
-            print(f"Species: {i.species}", end="\t")
-            print("\n")
 
 #checks to see if there is data for fauna, flora, or if both have valid data
 def checkLength(faunaData,floraData):
@@ -99,6 +95,28 @@ def checkLength(faunaData,floraData):
 def main():
     faunaData = [] #placeholder
     floraData = [] #placeholder
+    hasExisting = False #Flag stating if there are existing files
+    existingFiles = checkForExistingFiles() #existingFiles becomes a list of files that exist
+    if len(existingFiles) > 0: #if there are existing files...
+        hasExisting = True #flag true
+        for i in existingFiles: #check existing files
+            if ".csv" in i: #see if any are csv and read in using np
+                with open(i, 'r') as file:#open file
+                    reader = csv.reader(file)#read file
+                    data = list(reader)#make the data into a list
+                    if i == "fauna.csv": #if its fauna
+                        faunaData = np.array(data) #update faunaData with new information
+                    elif i == "flora.csv":
+                        floraData = np.array(data) #otherwise update floraData
+            elif ".txt" in i:#if csv doesn't exist but existing files do exist the only other file to check for is a text file
+                with open(i, 'r') as file:
+                    if i == "fauna.txt": # if fauna read lines in
+                        faunaData = file.readlines()
+                    elif i == "flora.txt": # if flora reads lines in
+                        floraData = file.readlines()                   
+    else: 
+        print("No existing files") 
+ 
     #user input for initial setup
     faunaSize = input("How many fauna live in your zoo?: ")
     floraSize = input("How many flora live in your zoo?: ")
@@ -126,40 +144,48 @@ def main():
         case "csv": #if its a csv....
            match check:
                 case "fauna": #if its fauna...
-                    printCsv(faunaData,"fauna")
+                    if "fauna.txt" in existingFiles:
+                        printText(faunaData,"fauna",hasExisting)
+                    printCsv(faunaData,"fauna",hasExisting)
                 case "flora": #if its flora...
-                    printCsv(floraData,"flora")
-                case "both":#if its both...
-                    printCsv(faunaData,"both")
-                    printCsv(floraData,"both")
+                    if "flora.txt" in existingFiles:
+                        printText(floraData,"flora",hasExisting)
+                    printCsv(floraData,"flora",hasExisting)
+                case "both":#if both have a valid length...
+                    if "flora.txt" in existingFiles:
+                        printText(faunaData,"fauna",hasExisting)
+                    if "fauna.txt" in existingFiles:
+                        printText(floraData,"flora",hasExisting)
+                    printCsv(faunaData,"fauna",hasExisting)
+                    printCsv(floraData,"flora",hasExisting)
                 case _:#if the cat jumped on the keyboard and spammed the input
                     print("invalid selection")                   
         case "text":  #if its a text....
             match check:
                 case "fauna":#if its fauna...
-                    printText(faunaData,"fauna")
+                    if "fauna.csv" in existingFiles:
+                        printCsv(faunaData,"fauna", hasExisting)
+                    printText(faunaData,"fauna", hasExisting)
                 case "flora":#if its flora...
-                    printText(floraData, "flora")
+                    if "flora.csv" in existingFiles:
+                        printCsv(faunaData,"fauna", hasExisting)
+                    printText(floraData, "flora", hasExisting)
                 case "both":#if its both...
-                    printText(faunaData,"both")
-                    printText(floraData, "both")
+                    if "flora.csv" in existingFiles:
+                        printCsv(floraData,"flora", hasExisting)
+                    if "fauna.csv" in existingFiles:
+                        printCsv(faunaData,"fauna",hasExisting)
+                    printText(faunaData,"fauna", hasExisting)
+                    printText(floraData, "flora", hasExisting)
                 case _:
                     print("invalid selection")                    
-        case "both":  #if its both....
-            match check:
-                case "fauna":#if its fauna...
-                    printCsv(faunaData, "fauna")
-                    printText(faunaData, "fauna")
-                case "flora":#if its flora...
-                    printCsv(floraData, "flora")
-                    printText(floraData, "flora")
-                case "both":#if its both...
-                    printCsv(faunaData, "fauna")
-                    printText(faunaData, "fauna")                    
-                    printCsv(floraData, "flora")
-                    printText(floraData, "flora")
-                case _: #if the you had an animal friend give the input
-                    print("invalid selection")
+        case "both":  #if its both in print selection....
+            printCsv(faunaData, "fauna", hasExisting)
+            printText(faunaData, "fauna", hasExisting)                    
+            printCsv(floraData, "flora", hasExisting)
+            printText(floraData, "flora", hasExisting)
+
         case _: #i'm running out of animal jokes but meh lets be real any animal would cause this error
             print("invalid selection")
+    print("Output saved and updated, have a great day!")
 main() #start your engine and initiate scope
