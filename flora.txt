@@ -1,2 +1,0 @@
-Name Areas Periods Climate SpecialConditions
-1	1	1	1	1
