@@ -1,0 +1,38 @@
+[
+  {
+    "0": {
+      "Name": "1",
+      "Kingdom": "1",
+      "Phylum": "1",
+      "Order": "1",
+      "Family": "1",
+      "Genus": "1",
+      "Species": "1"
+    },
+    "1": {
+      "Name": "2",
+      "Kingdom": "2",
+      "Phylum": "2",
+      "Order": "2",
+      "Family": "2",
+      "Genus": "2",
+      "Species": "2"
+    }
+  },
+  {
+    "0": {
+      "Name": "1",
+      "Areas": "1",
+      "Periods": "1",
+      "Climate": "1",
+      "SpecialConditions": "1"
+    },
+    "1": {
+      "Name": "1",
+      "Areas": "2",
+      "Periods": "2",
+      "Climate": "2",
+      "SpecialConditions": "2"
+    }
+  }
+]
